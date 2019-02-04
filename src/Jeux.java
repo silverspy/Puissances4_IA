@@ -10,15 +10,17 @@ public class Jeux {
         return plateaux;
     }
 
-    public boolean gagnerpartie(){
-        for (String[] c: plateaux){
-        for (int i = 0; i < plateaux.length; i++){
-            for (int j = 0; j < plateaux[i].length; j++){
-                if (plateaux[i][j] != " "){
+    public boolean gagnerpartie() {
+        for (String[] c : plateaux) {
+            for (int i = 0; i < plateaux.length; i++) {
+                for (int j = 0; j < plateaux[i].length; j++) {
+                    if (plateaux[i][j] != " ") {
 
+                    }
                 }
             }
         }
         return false;
     }
 }
+    
