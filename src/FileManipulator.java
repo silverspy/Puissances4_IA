@@ -3,9 +3,11 @@ import java.io.*;
 public class FileManipulator {
     private String url;
     private String[][] plateau;
+    private boolean joueur1;
 
-    FileManipulator(String url) throws IOException {
+    FileManipulator(String url, boolean j1) throws IOException {
         this.url = url;
+        this.joueur1 = j1;
         plateau = new String[6][7];
         for(int i = 0; i<6;i++){
             for(int y = 0;y<7;y++){
@@ -52,6 +54,10 @@ public class FileManipulator {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void getJoueur1() {
+        return this.joueur1;
     }
 
     public static void main(String[] args) {
