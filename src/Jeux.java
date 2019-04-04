@@ -15,6 +15,54 @@ public class Jeux {
         return plateaux;
     }
 
+    public ArrayList<int[]> getAllPossibilities(){
+      ArrayList<int[]> allPossib=new ArrayList<>();
+      for(String c:plateaux){
+        for(int x=0;x<plateaux.length;x++){
+          for(int y=0;y<plateaux[i].length;y++){
+
+          }
+        }
+      }
+    }
+
+    public int[] bestMoveTurn(ArrayList<int[]> a){
+      ArrayList<Integer> lsNoteCoup=new ArrayList<>();
+      for(int[] coupPossible:a){
+        lsNoteCoup.add(simulatePlay(coupPossible));
+      }
+      int taille=lsNoteCoup.size();
+      if(taille>0){
+        int max=lsNoteCoup[0];
+        int index=0;
+        for(int i=0;i<taille;i++){
+          if(lsNoteCoup>max){
+            max=lsNoteCoup[i];
+            index=i;
+          }
+        }
+      }
+      return a[index];
+    }
+
+    public int bestMoveAdversory(ArrayList<int[] a){
+      ArrayList<Integer> lsNoteCoup=new ArrayList<>();
+      for(int[] coupPossible:a){
+        simulatePlayAdversory(coupPossible);
+      }
+      int taille=lsNoteCoup.size();
+      if(taille>0){
+        int max=lsNoteCoup[0];
+        int index=0;
+        for(int i=0;i<taille;i++){
+          if(lsNoteCoup>max){
+            max=lsNoteCoup[i];
+            index=i;
+          }
+        }
+      }
+      return a[index];
+    }
     public void nbjetons() {
         for (String[] c : plateaux) {
             for (int i = 0; i < plateaux.length; i++) {
@@ -65,4 +113,3 @@ public class Jeux {
         System.out.println(plusGrosGroupe);
     }
 }
-
