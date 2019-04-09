@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
@@ -90,6 +91,16 @@ public void play(int x,int y) {
 		this.plateaux[x][y]="O";
 }
 //to test
+public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivitéLevel,int branchKey,List<int[]> listBranchKey) {
+	if(branchKey==3&recursivitéLevel>=6) {
+		playBestScore(accuValue, this.plateaux);
+		return;
+	}else {
+		if(accuValue.get(listBranchKey.get(branchKey))==-15||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
+			bestPlay2(plateauCourant, accuValue, recursivitéLevel, branchKey, listBranchKey);
+		}
+	}
+}
 public void bestPlay(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivityLevel,int[] branchKey) {
 	System.out.println("\n");
 	System.out.println("plateau : "+Arrays.deepToString(plateauCourant));
@@ -103,13 +114,13 @@ public void bestPlay(String [][] plateauCourant,HashMap<int[],Integer> accuValue
 		playBestScore(accuValue,this.plateaux);
 		return;
 	}else {
-		if(accuValue.containsValue(10)||accuValue.containsValue(9)) {
+		if(accuValue.containsValue(15)||accuValue.containsValue(9)||accuValue.containsValue(10)||accuValue.containsValue(11)||accuValue.containsValue(12)) {
 			playBestScore(accuValue,this.plateaux);
 			return;
 		}
-		if(accuValue.containsValue(-10)||accuValue.containsValue(-9)) {
-			//remove keyBranch from map
+		if((accuValue.containsValue(-15)||accuValue.containsValue(-9)||accuValue.containsValue(-10)||accuValue.containsValue(-11)||accuValue.containsValue(-12))&&accuValue.size()>0) {
 			accuValue.remove(branchKey);
+			return;
 		}else {
 			if(recursivityLevel%2==0) {
 				System.out.println("adversory turn");
@@ -438,52 +449,64 @@ public int evaluationPoint(String[][] plateau,int[] coup,boolean joueur){
 		int totdir1=1;
 		int totdir2=1;
 		int totdir3=1;
+		int totdir4=1;
 		int somme=0;
-		int gau=evaluationDirection(plateau, coup, "G",false);
-		int d=evaluationDirection(plateau, coup, "D",false);
+		int gau=evaluationDirection(plateau, coup, "G");
+		int d=evaluationDirection(plateau, coup, "D");
 		totdir1+=gau+d;
 		result.put("G+D",totdir1);
 		somme+=result.get("G+D");
-		gau=evaluationDirection(plateau, coup, "GN",false);
-		d=evaluationDirection(plateau, coup, "DS",false);
+		gau=evaluationDirection(plateau, coup, "GN");
+		d=evaluationDirection(plateau, coup, "DS");
 		totdir2+=gau+d;
 		result.put("GS+DS",totdir2);
 		somme+=totdir2;
-		gau=evaluationDirection(plateau, coup, "DN",false);
-		d=evaluationDirection(plateau, coup, "GS",false);
+		gau=evaluationDirection(plateau, coup, "DN");
+		d=evaluationDirection(plateau, coup, "GS");
 		totdir3+=gau+d;
 		result.put("DN+GS",totdir3);
 		somme+=result.get("DN+GS");
+		gau=evaluationDirection(plateau, coup, "N");
+		d=evaluationDirection(plateau, coup, "S");
+		totdir4+=gau+d;
+		result.put("NS", totdir4);
+		somme+=totdir4;
+		//System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
 		if(result.containsValue(4)) {
-			return -10;
+			return -15;
 		}else {
 			switch (somme) {
-			case 3:
-				return 0;
 			case 4:
-				return -1;
+				return 0;
 			case 5:
-				if(result.containsValue(3)) {
-					return -3;
-				}else {
-					return -2;
-				}
+				return -1;
 			case 6:
-				if(result.containsValue(3)) {
+				if(!result.containsValue(3))
+					return -2;
+				else
 					return -5;
-				}else {
-					return -4;
-				}
 			case 7:
-				if(result.containsValue(1)) {
-					return -7;
-				}else {
-					return -6;
-				}
+					if(result.containsValue(3))
+						return -6;
+					else
+						return -4;
 			case 8:
-				return -8;
+				if(result.containsValue(3))
+					return -7;
+				else
+					return -4;
 			case 9:
-				return -9;
+				if(result.containsValue(1)) {
+					return -9;
+				}else {
+					return -8;
+				}
+			case 10:
+				return -10;
+			case 11:
+				return -11;
+			case 12:
+				return -12;
 			default:
 				return 0;
 			}
