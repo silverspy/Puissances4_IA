@@ -115,7 +115,6 @@ public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValu
 		}
 		System.out.println(" \n");
 		if(accuValue.get(listBranchKey.get(branchKey))==-15||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
-			System.out.println("ne doit pas jouer le coup "+listBranchKey.get(branchKey));
 		}else {
 			if(accuValue.get(listBranchKey.get(branchKey))==15||accuValue.get(listBranchKey.get(branchKey))==12||accuValue.get(listBranchKey.get(branchKey))==11||accuValue.get(listBranchKey.get(branchKey))==10||accuValue.get(listBranchKey.get(branchKey))==9) {
 				plateauCourant=simulationCoup(this.plateaux,listBranchKey.get(branchKey+1));
@@ -124,7 +123,6 @@ public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValu
 				return;
 			}else {
 				if(recursivityLevel%2==0) {
-					System.out.println("l'adversaire joue");
 					if(recursivityLevel!=6) {
 						HashMap<int[], Integer> bestPossib=bestPossibAdv(plateauCourant);
 						int [] coupAJouer=new int[2];
@@ -840,20 +838,48 @@ private int evaluationDirectionAdv(String[][] plateau, int[] coup, String direct
 
                 p.changementJeux(args[0]);
                 ArrayList<int[]> possibility=p.Possibilities(p.plateaux);
-                Random rand =new Random();
-                HashMap<int[], Integer> accuValue=new HashMap<int[], Integer>();
-                int[] key= {};
-                ArrayList<int[]>listKey=new ArrayList<int[]>();
-                int[] k=new int[] {3};
-                listKey.add(new int[]{0});
-                listKey.add(new int[]{1});
-                listKey.add(new int[]{2});
-                listKey.add(k);
-                accuValue.put(k, 0);
-               //accuValue=p.bestPossibilities(p.plateaux, possibility);
-                p.bestPlay2(p.plateaux, accuValue, 1,3,listKey);
-                //int n=rand.nextInt(possibility.size());
-                //p.play(possibility.get(n)[0], possibility.get(n)[1]);
+                boolean win=false;
+                boolean loose=false;
+                for(int i=0;i<p.plateaux.length;i++) {
+                	for(int j=0;j<p.plateaux[i].length;j++) {
+                		if(p.evaluationPoint(p.plateaux,new int[] {i,j},true)==15||p.evaluationPoint(p.plateaux,new int[] {i,j}, false)==-15) {
+                			if(p.evaluationPoint(p.plateaux, new int[] {i,j},true)==15) {
+                				System.out.println("ici");
+                				win=true;
+                			}else {
+                				loose=true;
+                			}
+                		}
+                	}
+                }
+                System.out.println(win);
+                if(possibility.size()>0&&win==false&&loose==false) {
+                	Random rand =new Random();
+                	HashMap<int[], Integer> accuValue=new HashMap<int[], Integer>();
+                	int[] key= {};
+                	ArrayList<int[]>listKey=new ArrayList<int[]>();
+                	int[] k=new int[] {3};
+                	listKey.add(new int[]{0});
+                	listKey.add(new int[]{1});
+                	listKey.add(new int[]{2});
+                	listKey.add(k);
+                	accuValue.put(k, 0);
+                	//accuValue=p.bestPossibilities(p.plateaux, possibility);
+                	p.bestPlay2(p.plateaux, accuValue, 1,3,listKey);
+                	//int n=rand.nextInt(possibility.size());
+                	//p.play(possibility.get(n)[0], possibility.get(n)[1]);
+                }else {
+                	if(possibility.size()<=0) {
+                		System.out.println("le plateau est plein !!");
+                	}else {
+                		if(win==true) {
+                			
+                			System.out.println("la partie est gagner rentrez un fichier valide");
+                		}else {
+                			System.out.println("la partie est perdue rentrez un fichier valide ");
+                		}
+                	}
+                }
                 //p.exportGame();
             }else {
                 System.out.println("Indiquer un fichier existant");
