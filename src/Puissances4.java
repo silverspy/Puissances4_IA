@@ -91,13 +91,13 @@ public void play(int x,int y) {
 		this.plateaux[x][y]="O";
 }
 //to test
-public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivit�Level,int branchKey,List<int[]> listBranchKey) {
-	if(branchKey==3&recursivit�Level>=6) {
+public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivityLevel,int branchKey,List<int[]> listBranchKey) {
+	if(branchKey==3&recursivityLevel>=6) {
 		playBestScore(accuValue, this.plateaux);
 		return;
 	}else {
 		if(accuValue.get(listBranchKey.get(branchKey))==-15||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
-			bestPlay2(plateauCourant, accuValue, recursivit�Level, branchKey, listBranchKey);
+			bestPlay2(plateauCourant, accuValue, recursivityLevel, branchKey, listBranchKey);
 		}
 	}
 }
@@ -165,125 +165,6 @@ public void bestPlay(String [][] plateauCourant,HashMap<int[],Integer> accuValue
 		}
 	}
 }
-
-    }
-    //ok
-    public  void changementJeux(String nomFile){
-        Puissances4 p=new Puissances4();
-        File f=new File(nomFile);
-        BufferedReader br;
-        ArrayList<String> tab=new ArrayList<String>();
-        try {
-            br = new BufferedReader(new FileReader(f));
-            String line;
-            while((line=br.readLine())!=null) {
-                tab.add(line);
-            }
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        Collections.reverse(tab);
-        String [] t= new String [6];
-        for(int i=0;i<tab.size();i++) {
-            t[i]=tab.get(i);
-        }
-        for(int y=0;y<this.plateaux.length;y++) {
-            t[y]=t[y].replace("X", "D");
-            t[y]=t[y].replace("O", "X");
-            t[y]=t[y].replace("D", "O");
-            char[] lineChar=t[y].toCharArray();
-            for(int x=0;x<this.plateaux[y].length;x++) {
-                this.plateaux[y][x]=String.valueOf(lineChar[x]);
-            }
-        }
-    }
-    //renvoie une arrayList des coups possibles
-    public ArrayList<int[]> Possibilities(String[][] plateau){
-        ArrayList<int[]> possibilities=new ArrayList<int[]>();
-        if(!gameLost()) {
-            for(int numCol=0;numCol<7;numCol++) {
-                if(possibilityCol(numCol,plateau)!=-1) {
-                    int []t = {possibilityCol(numCol,plateau),numCol};
-                    possibilities.add(t);
-                }
-            }
-        }
-        return possibilities;
-    }
-
-    public void play(int x,int y) {
-        this.plateaux[x][y]="O";
-    }
-    //to test
-    public void bestPlay(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivityLevel,int[] branchKey) {
-        System.out.println("\n");
-        System.out.println("plateau : "+Arrays.deepToString(plateauCourant));
-        System.out.println("Hashmap : "+Arrays.asList(accuValue));
-        for (Entry<int[], Integer> entry : accuValue.entrySet()) {
-            System.out.println(Arrays.toString(entry.getKey())+" : "+entry.getValue());
-        }
-        System.out.println("branch test : "+Arrays.toString(branchKey));
-        System.out.println("recursivity level : "+recursivityLevel);
-        if(recursivityLevel>6) {
-            playBestScore(accuValue,this.plateaux);
-            return;
-        }else {
-            if(accuValue.containsValue(10)||accuValue.containsValue(9)) {
-                playBestScore(accuValue,this.plateaux);
-                return;
-            }
-            if(accuValue.containsValue(-10)||accuValue.containsValue(-9)) {
-                //remove keyBranch from map
-                accuValue.remove(branchKey);
-            }else {
-                if(recursivityLevel%2==0) {
-                    System.out.println("adversory turn");
-                    //get best possibility
-                    //get score of best possibility
-                    //update plateau wuth best coup
-                    //bestPlay(plateauAdv)
-                    HashMap<int[], Integer> bestPossib=bestPossibAdv(plateauCourant);
-                    int [] coupAJouer=new int[2];
-                    int maxValueInMap=(Collections.max(accuValue.values()));
-                    for (Entry<int[], Integer> entry : accuValue.entrySet()) {  // Itrate through hashmap
-                        if (entry.getValue()==maxValueInMap) {
-                            coupAJouer=entry.getKey();     // Print the key with max value
-                        }
-                    }
-                    String[][] plateauAdv=simulatePlateauAdv(plateauCourant,coupAJouer);
-                    accuValue.replace(branchKey, bestPossib.get(coupAJouer));
-                    bestPlay(plateauAdv,accuValue,(recursivityLevel+1),branchKey);
-                }else {
-                    if(branchKey.length==0) {
-                        System.out.println("ici");
-                        ArrayList<int[]> possibilities=Possibilities(this.plateaux);
-                        HashMap<int[],Integer> mapPossibilities=bestPossibilities(this.plateaux,possibilities);
-                        String [][] plateauSimul;
-                        for(int[] key:mapPossibilities.keySet()) {
-                            plateauSimul=simulationCoup(this.plateaux,key);
-                            recursivityLevel=1;
-                            bestPlay(plateauSimul, mapPossibilities, (recursivityLevel+1), key);
-                        }
-                    }else {
-                        System.out.println("player turn but not during the first turn");
-                        ArrayList<int[]> possibilities=Possibilities(plateauCourant);
-                        HashMap<int[],Integer> mapPossibilities=bestPossibilities(plateauCourant,possibilities);
-                        String [][] plateauSimul;
-                        for(int[] key:mapPossibilities.keySet()) {
-                            plateauSimul=simulationCoup(plateauCourant,key);
-                            accuValue.put(branchKey, mapPossibilities.get(key));
-                            bestPlay(plateauSimul, accuValue, (recursivityLevel+1), branchKey);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private HashMap<int[], Integer> bestPossibAdv(String[][] plateauCourant) {
         ArrayList<int[]> poss=Possibilities(plateauCourant);
         HashMap<int[], Integer> accuValue=new HashMap();
