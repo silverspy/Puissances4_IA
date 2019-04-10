@@ -824,8 +824,109 @@ public class Puissances4 {
         exportGame();
     }
     //determine si la partie est finie
+    private boolean gameLostRigth(int i, int j){
+        if (j+3 > 6){
+            return false;
+        }else{
+            if(this.plateaux[i][j].equals("X") && this.plateaux[i][j+1].equals("X") && this.plateaux[i][j+2].equals("X") && this.plateaux[i][j+3].equals("X")){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+    private boolean gameLostLeft(int i, int j){
+        if (j-3 < 0){
+            return false;
+        }else{
+            if(this.plateaux[i][j].equals("X") && this.plateaux[i][j-1].equals("X") && this.plateaux[i][j-2].equals("X") && this.plateaux[i][j-3].equals("X")){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+    private boolean gameLostBot(int i, int j){
+        if (i-3 < 0){
+            return false;
+        }else{
+            if(this.plateaux[i][j].equals("X") && this.plateaux[i-1][j].equals("X") && this.plateaux[i-2][j].equals("X") && this.plateaux[i-3][j].equals("X")){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+    private boolean gameLostTop(int i, int j){
+        if (i+3 > 5){
+            return false;
+        }else{
+            if(this.plateaux[i][j].equals("X") && this.plateaux[i+1][j].equals("X") && this.plateaux[i+2][j].equals("X") && this.plateaux[i+3][j].equals("X")){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+    private boolean gameLostLeftBot(int i, int j){
+        if ((i-3 < 0)||(j-3<0)){
+            return false;
+        }else{
+            if(this.plateaux[i][j].equals("X") && this.plateaux[i-1][j-1].equals("X") && this.plateaux[i-2][j-2].equals("X") && this.plateaux[i-3][j-3].equals("X")){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+    private boolean gameLostRightTop(int i, int j){
+        if ((i+3 > 5)||(j+3 > 6)){
+            return false;
+        }else{
+            if(this.plateaux[i][j].equals("X") && this.plateaux[i+1][j+1].equals("X") && this.plateaux[i+2][j+2].equals("X") && this.plateaux[i+3][j+3].equals("X")){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+    private boolean gameLostRightBot(int i, int j){
+        if ((i+3 > 5)||(j-3 < 0)){
+            return false;
+        }else{
+            if(this.plateaux[i][j].equals("X") && this.plateaux[i+1][j-1].equals("X") && this.plateaux[i+2][j-2].equals("X") && this.plateaux[i+3][j-3].equals("X")){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+    private boolean gameLostLeftTop(int i, int j){
+        if ((i-3 < 0)||(j+3 > 6)){
+            return false;
+        }else{
+            if(this.plateaux[i][j].equals("X") && this.plateaux[i-1][j+1].equals("X") && this.plateaux[i-2][j+2].equals("X") && this.plateaux[i-3][j+3].equals("X")){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+    //determine si la partie est finie
     private boolean gameLost() {
-        // TODO Auto-generated method stub
+        for(int i=0;i<this.plateaux.length;i++) {
+            for (int j = 0; j < this.plateaux[i].length; j++) {
+                if (gameLostBot(i,j) || gameLostLeft(i,j) || gameLostLeftBot(i,j) || gameLostLeftTop(i, j) ||
+                        gameLostRightBot(i, j)|| gameLostRightTop(i,j) || gameLostRigth(i, j) || gameLostTop(i, j)){
+                    return true;
+                }
+            }
+        }
         return false;
     }
     //ok
