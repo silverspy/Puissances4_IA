@@ -14,168 +14,176 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 public class Puissances4 {
-	String[][] plateaux;
-	public Puissances4() {
-		// TODO Auto-generated constructor stub
-		this.plateaux=new String[6][7];
-	}
-	//ok
-	public void exportGame() {
-		String str="";
-		for(int i=(this.plateaux.length-1);i>=0;i--) {
-			for(int j=0;j<this.plateaux[i].length;j++) {
-				str+=this.plateaux[i][j];
-			}
-			str+="\n";
-		}
-		FileWriter fileWriter;
-		try {
-			fileWriter = new FileWriter("game.txt");
-			fileWriter.write(str);
-			fileWriter.close();
-			System.exit(0);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
-	//ok
-	public  void changementJeux(String nomFile){
-		Puissances4 p=new Puissances4();
-		File f=new File(nomFile);
-		BufferedReader br;
-		ArrayList<String> tab=new ArrayList<String>();
-		try {
-			br = new BufferedReader(new FileReader(f));
-			String line;
-			while((line=br.readLine())!=null) {
-				tab.add(line);
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Collections.reverse(tab);
-		String [] t= new String [6];
-		for(int i=0;i<tab.size();i++) {
-			t[i]=tab.get(i);
-		}
-		for(int y=0;y<this.plateaux.length;y++) {
-			t[y]=t[y].replace("X", "D");
-			t[y]=t[y].replace("O", "X");
-			t[y]=t[y].replace("D", "O");
-			char[] lineChar=t[y].toCharArray();
-			for(int x=0;x<this.plateaux[y].length;x++) {
-				this.plateaux[y][x]=String.valueOf(lineChar[x]);
-			}
-		}
-	}
-	//renvoie une arrayList des coups possibles 
-	public ArrayList<int[]> Possibilities(String[][] plateau){
-		ArrayList<int[]> possibilities=new ArrayList<int[]>();
-		if(!gameLost()) {
-			for(int numCol=0;numCol<7;numCol++) {
-				if(possibilityCol(numCol,plateau)!=-1) {
-					int []t = {possibilityCol(numCol,plateau),numCol};
-					possibilities.add(t);
-				}
-			}
-		}
-		return possibilities;
-	}
-	
-public void play(int x,int y) {
-		this.plateaux[x][y]="O";
-}
-//to test
-public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivityLevel,int branchKey,List<int[]> listBranchKey) {
-	if(branchKey==2&&recursivityLevel>=6) {
-		System.out.println("on joue ici");
-		playBestScore(accuValue, this.plateaux);
-		return;
-	}else {
-		System.out.println("\n niveau recursivité : "+recursivityLevel);
-		System.out.println("branch key : "+branchKey);
-		System.out.println("branche explorée :" +Arrays.toString(listBranchKey.get(branchKey)));
-		System.out.print("list : ");
-		for(int[] t:listBranchKey) {
-			System.out.print(Arrays.toString(t)+" : ");
-		}
-		System.out.print("\n");
-		System.out.println(Arrays.deepToString(plateauCourant));
-		System.out.print(" hashmap :");
-		for (int[] name: accuValue.keySet()){
-            String key = Arrays.toString(name);
-            String value = accuValue.get(name).toString();  
-            System.out.print(key + "=>" + value+" ;");  
-		}
-		System.out.println(" \n");
-		if(accuValue.get(listBranchKey.get(branchKey))==-15||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
-		}else {
-			if(accuValue.get(listBranchKey.get(branchKey))==15||accuValue.get(listBranchKey.get(branchKey))==12||accuValue.get(listBranchKey.get(branchKey))==11||accuValue.get(listBranchKey.get(branchKey))==10||accuValue.get(listBranchKey.get(branchKey))==9) {
-				plateauCourant=simulationCoup(this.plateaux,listBranchKey.get(branchKey+1));
-				System.out.println("ici on joue");
-				playBestScore(accuValue, plateauCourant);
-				return;
-			}else {
-				if(recursivityLevel%2==0) {
-					if(recursivityLevel!=6) {
-						HashMap<int[], Integer> bestPossib=bestPossibAdv(plateauCourant);
-						int [] coupAJouer=new int[2];
-						int maxValueInMap=(Collections.min(bestPossib.values()));
-						System.out.println(maxValueInMap);
-					    for (Entry<int[], Integer> entry : bestPossib.entrySet()) {  // Itrate through hashmap
-					        if (entry.getValue()==maxValueInMap) {
-					        	coupAJouer=entry.getKey();     // Print the key with max value
-					        }
-					    }
-					    System.out.println("min value : "+maxValueInMap);
-						String[][] plateauAdv=simulatePlateauAdv(plateauCourant,coupAJouer);
-						accuValue.replace(listBranchKey.get(branchKey), bestPossib.get(coupAJouer));
-						bestPlay2(plateauAdv, accuValue, recursivityLevel+1, branchKey, listBranchKey);
-					}
-					
-				}else {
-					if(branchKey==3) {
-						ArrayList<int[]> possibilities=Possibilities(this.plateaux);
-						HashMap<int[],Integer> mapPossibilities=bestPossibilities(this.plateaux,possibilities);
-						String [][] plateauSimul;
-						int indice=0;
-						for(int[] key:mapPossibilities.keySet()) {
-							plateauSimul=simulationCoup(this.plateaux,key);
-							recursivityLevel=1;
-							bestPlay2(plateauSimul, mapPossibilities, (recursivityLevel+1),indice,new ArrayList<int[]>(mapPossibilities.keySet()));
-							indice++;
-						}
-					}else {
-						System.out.println("player turn but not during the first turn");
-						ArrayList<int[]> possibilities=Possibilities(plateauCourant);
-						HashMap<int[],Integer> mapPossibilities=bestPossibilities(plateauCourant,possibilities);
-						String [][] plateauSimul;
-						for(int[] key:mapPossibilities.keySet()) {
-							plateauSimul=simulationCoup(plateauCourant,key);
-							accuValue.put(listBranchKey.get(branchKey), mapPossibilities.get(key));
-							bestPlay2(plateauSimul, accuValue, (recursivityLevel+1), branchKey,listBranchKey);
-						}
-					}
-				}
-			}
-		}
-	}
-}
+    String[][] plateaux;
+    String[][] plateausortie;
+    public Puissances4() {
+        // TODO Auto-generated constructor stub
+        this.plateaux=new String[6][7];
+        this.plateausortie = new String[6][7];
+    }
+    //ok
+    public void exportGame() {
+        String str="";
+        for(int i=(this.plateausortie.length-1);i>=0;i--) {
+            for (int j = 0; j < this.plateausortie[i].length; j++) {
+                str += this.plateausortie[i][j];
+            }
+            str += "\n";
+        }
+        FileWriter fileWriter;
+        try {
+            fileWriter = new FileWriter("game.txt");
+            fileWriter.write(str);
+            fileWriter.close();
+            System.exit(0);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+    //ok
+    public  void changementJeux(String nomFile){
+        Puissances4 p=new Puissances4();
+        File f=new File(nomFile);
+        BufferedReader br;
+        ArrayList<String> tab=new ArrayList<String>();
+        try {
+            br = new BufferedReader(new FileReader(f));
+            String line;
+            while((line=br.readLine())!=null) {
+                tab.add(line);
+            }
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Collections.reverse(tab);
+        String [] t= new String [6];
+        for(int i=0;i<tab.size();i++) {
+            t[i]=tab.get(i);
+        }
+        for(int y=0;y<this.plateaux.length;y++) {
+            t[y]=t[y].replace("X", "D");
+            t[y]=t[y].replace("O", "X");
+            t[y]=t[y].replace("D", "O");
+            char[] lineChar=t[y].toCharArray();
+            for(int x=0;x<this.plateaux[y].length;x++) {
+                this.plateaux[y][x]=String.valueOf(lineChar[x]);
+            }
+        }
+        for(int i=(this.plateaux.length-1);i>=0;i--) {
+            for(int j=0;j<this.plateaux[i].length;j++) {
+                this.plateausortie[i][j]=this.plateaux[i][j];
+            }
+        }
+
+    }
+    //renvoie une arrayList des coups possibles
+    public ArrayList<int[]> Possibilities(String[][] plateau){
+        ArrayList<int[]> possibilities=new ArrayList<int[]>();
+        if(!gameLost()) {
+            for(int numCol=0;numCol<7;numCol++) {
+                if(possibilityCol(numCol,plateau)!=-1) {
+                    int []t = {possibilityCol(numCol,plateau),numCol};
+                    possibilities.add(t);
+                }
+            }
+        }
+        return possibilities;
+    }
+
+    public void play(int x,int y) {
+        this.plateaux[x][y]="O";
+    }
+    //to test
+    public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivityLevel,int branchKey,List<int[]> listBranchKey) {
+        if(branchKey==2&&recursivityLevel>=6) {
+            System.out.println("on joue ici");
+            playBestScore(accuValue, this.plateaux);
+            return;
+        }else {
+            System.out.println("\n niveau recursivitï¿½ : "+recursivityLevel);
+            System.out.println("branch key : "+branchKey);
+            System.out.println("branche explorï¿½e :" +Arrays.toString(listBranchKey.get(branchKey)));
+            System.out.print("list : ");
+            for(int[] t:listBranchKey) {
+                System.out.print(Arrays.toString(t)+" : ");
+            }
+            System.out.print("\n");
+            System.out.println(Arrays.deepToString(plateauCourant));
+            System.out.print(" hashmap :");
+            for (int[] name: accuValue.keySet()){
+                String key = Arrays.toString(name);
+                String value = accuValue.get(name).toString();
+                System.out.print(key + "=>" + value+" ;");
+            }
+            System.out.println(" \n");
+            if(accuValue.get(listBranchKey.get(branchKey))==-15||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
+            }else {
+                if(accuValue.get(listBranchKey.get(branchKey))==15||accuValue.get(listBranchKey.get(branchKey))==12||accuValue.get(listBranchKey.get(branchKey))==11||accuValue.get(listBranchKey.get(branchKey))==10||accuValue.get(listBranchKey.get(branchKey))==9) {
+                    plateauCourant=simulationCoup(this.plateaux,listBranchKey.get(branchKey+1));
+                    System.out.println("ici on joue");
+                    playBestScore(accuValue, plateauCourant);
+                    return;
+                }else {
+                    if(recursivityLevel%2==0) {
+                        if(recursivityLevel!=6) {
+                            HashMap<int[], Integer> bestPossib=bestPossibAdv(plateauCourant);
+                            int [] coupAJouer=new int[2];
+                            int maxValueInMap=(Collections.min(bestPossib.values()));
+                            System.out.println(maxValueInMap);
+                            for (Entry<int[], Integer> entry : bestPossib.entrySet()) {  // Itrate through hashmap
+                                if (entry.getValue()==maxValueInMap) {
+                                    coupAJouer=entry.getKey();     // Print the key with max value
+                                }
+                            }
+                            System.out.println("min value : "+maxValueInMap);
+                            String[][] plateauAdv=simulatePlateauAdv(plateauCourant,coupAJouer);
+                            accuValue.replace(listBranchKey.get(branchKey), bestPossib.get(coupAJouer));
+                            bestPlay2(plateauAdv, accuValue, recursivityLevel+1, branchKey, listBranchKey);
+                        }
+
+                    }else {
+                        if(branchKey==3) {
+                            ArrayList<int[]> possibilities=Possibilities(this.plateaux);
+                            HashMap<int[],Integer> mapPossibilities=bestPossibilities(this.plateaux,possibilities);
+                            String [][] plateauSimul;
+                            int indice=0;
+                            for(int[] key:mapPossibilities.keySet()) {
+                                plateauSimul=simulationCoup(this.plateaux,key);
+                                recursivityLevel=1;
+                                bestPlay2(plateauSimul, mapPossibilities, (recursivityLevel+1),indice,new ArrayList<int[]>(mapPossibilities.keySet()));
+                                indice++;
+                            }
+                        }else {
+                            System.out.println("player turn but not during the first turn");
+                            ArrayList<int[]> possibilities=Possibilities(plateauCourant);
+                            HashMap<int[],Integer> mapPossibilities=bestPossibilities(plateauCourant,possibilities);
+                            String [][] plateauSimul;
+                            for(int[] key:mapPossibilities.keySet()) {
+                                plateauSimul=simulationCoup(plateauCourant,key);
+                                accuValue.put(listBranchKey.get(branchKey), mapPossibilities.get(key));
+                                bestPlay2(plateauSimul, accuValue, (recursivityLevel+1), branchKey,listBranchKey);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private HashMap<int[], Integer> bestPossibAdv(String[][] plateauCourant) {
-    	//System.out.println("dans best Possib adv");
+        //System.out.println("dans best Possib adv");
         ArrayList<int[]> poss=Possibilities(plateauCourant);
         HashMap<int[], Integer> accuValue=new HashMap();
         HashMap<int[], Integer> res=new HashMap();
         for(int[] coup:poss) {
             accuValue.put(coup,evaluationPoint(plateauCourant, coup, false));
-           // System.out.println(evaluationPoint(plateauCourant, coup, false));
+            // System.out.println(evaluationPoint(plateauCourant, coup, false));
         }
         int [] coupAJouer=new int[2];
         int maxValueInMap=(Collections.min(accuValue.values()));
@@ -382,280 +390,280 @@ public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValu
 //GS gauche sud x-1 y-1
 //ect
 //peut etre rajoutï¿½ un boolean pour indiquer si joueur ou non pour reutiliser code
-public int evaluationPoint(String[][] plateau,int[] coup,boolean joueur){
-	HashMap<String, Integer> result=new HashMap<String, Integer>();
-	if(joueur) {
-		int totdir1=1;
-		int totdir2=1;
-		int totdir3=1;
-		int totdir4=1;
-		int somme=0;
-		int gau=evaluationDirection(plateau, coup, "G");
-		int d=evaluationDirection(plateau, coup, "D");
-		totdir1+=gau+d;
-		result.put("G+D",totdir1);
-		somme+=result.get("G+D");
-		gau=evaluationDirection(plateau, coup, "GN");
-		d=evaluationDirection(plateau, coup, "DS");
-		totdir2+=gau+d;
-		result.put("GS+DS",totdir2);
-		somme+=totdir2;
-		gau=evaluationDirection(plateau, coup, "DN");
-		d=evaluationDirection(plateau, coup, "GS");
-		totdir3+=gau+d;
-		result.put("DN+GS",totdir3);
-		somme+=result.get("DN+GS");
-		gau=evaluationDirection(plateau, coup, "N");
-		d=evaluationDirection(plateau, coup, "S");
-		totdir4+=gau+d;
-		result.put("NS", totdir4);
-		somme+=totdir4;
-		//System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
-		if(result.containsValue(4)) {
-			return 15;
-		}else {
-			switch (somme) {
-			case 4:
-				return 0;
-			case 5:
-				return 1;
-			case 6:
-				if(!result.containsValue(3))
-					return 2;
-				else
-					return 5;
-			case 7:
-					if(result.containsValue(3))
-						return 6;
-					else
-						return 4;
-			case 8:
-				if(result.containsValue(3))
-					return 7;
-				else
-					return 4;
-			case 9:
-				if(result.containsValue(1)) {
-					return 9;
-				}else {
-					return 8;
-				}
-			case 10:
-				return 10;
-			case 11:
-				return 11;
-			case 12:
-				return 12;
-			default:
-				return 0;
-			}
-		}
-	}else {
-		int totdir1=1;
-		int totdir2=1;
-		int totdir3=1;
-		int totdir4=1;
-		int somme=0;
-		int gau=evaluationDirectionAdv(plateau, coup, "G");
-		int d=evaluationDirectionAdv(plateau, coup, "D");
-		totdir1+=gau+d;
-		result.put("G+D",totdir1);
-		somme+=result.get("G+D");
-		gau=evaluationDirectionAdv(plateau, coup, "GN");
-		d=evaluationDirectionAdv(plateau, coup, "DS");
-		totdir2+=gau+d;
-		result.put("GS+DS",totdir2);
-		somme+=totdir2;
-		gau=evaluationDirectionAdv(plateau, coup, "DN");
-		d=evaluationDirectionAdv(plateau, coup, "GS");
-		totdir3+=gau+d;
-		result.put("DN+GS",totdir3);
-		somme+=result.get("DN+GS");
-		gau=evaluationDirectionAdv(plateau, coup, "N");
-		d=evaluationDirectionAdv(plateau, coup, "S");
-		totdir4+=gau+d;
-		result.put("NS", totdir4);
-		somme+=totdir4;
-		//System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
-		if(result.containsValue(4)) {
-			return -15;
-		}else {
-			switch (somme) {
-			case 4:
-				return 0;
-			case 5:
-				return -1;
-			case 6:
-				if(!result.containsValue(3))
-					return -2;
-				else
-					return -5;
-			case 7:
-					if(result.containsValue(3))
-						return -6;
-					else
-						return -4;
-			case 8:
-				if(result.containsValue(3))
-					return -7;
-				else
-					return -4;
-			case 9:
-				if(result.containsValue(1)) {
-					return -9;
-				}else {
-					return -8;
-				}
-			case 10:
-				return -10;
-			case 11:
-				return -11;
-			case 12:
-				return -12;
-			default:
-				return 0;
-			}
-		}
-	}
-}
-private int evaluationDirectionAdv(String[][] plateau, int[] coup, String direction) {
-    // TODO Auto-generated method stub
-    boolean place=true;
-    int nbJetonAligne=0;
-    int lastX=coup[0];
-    int lastY=coup[1];
-    switch (direction) {
-        case "GN":
-            lastX=lastX+1;
-            lastY=lastY-1;
-            while(place==true) {
-                if(lastX<plateau.length&&lastY>=0) {
-                    if(plateau[lastX][lastY].equals("X")) {
-                        nbJetonAligne=nbJetonAligne+1;
-                        lastX=lastX+1;
-                        lastY=lastY-1;
-                    }else {
-                        place=false;
-                    }
-                }else {
-                    place=false;
+    public int evaluationPoint(String[][] plateau,int[] coup,boolean joueur){
+        HashMap<String, Integer> result=new HashMap<String, Integer>();
+        if(joueur) {
+            int totdir1=1;
+            int totdir2=1;
+            int totdir3=1;
+            int totdir4=1;
+            int somme=0;
+            int gau=evaluationDirection(plateau, coup, "G");
+            int d=evaluationDirection(plateau, coup, "D");
+            totdir1+=gau+d;
+            result.put("G+D",totdir1);
+            somme+=result.get("G+D");
+            gau=evaluationDirection(plateau, coup, "GN");
+            d=evaluationDirection(plateau, coup, "DS");
+            totdir2+=gau+d;
+            result.put("GS+DS",totdir2);
+            somme+=totdir2;
+            gau=evaluationDirection(plateau, coup, "DN");
+            d=evaluationDirection(plateau, coup, "GS");
+            totdir3+=gau+d;
+            result.put("DN+GS",totdir3);
+            somme+=result.get("DN+GS");
+            gau=evaluationDirection(plateau, coup, "N");
+            d=evaluationDirection(plateau, coup, "S");
+            totdir4+=gau+d;
+            result.put("NS", totdir4);
+            somme+=totdir4;
+            //System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
+            if(result.containsValue(4)) {
+                return 15;
+            }else {
+                switch (somme) {
+                    case 4:
+                        return 0;
+                    case 5:
+                        return 1;
+                    case 6:
+                        if(!result.containsValue(3))
+                            return 2;
+                        else
+                            return 5;
+                    case 7:
+                        if(result.containsValue(3))
+                            return 6;
+                        else
+                            return 4;
+                    case 8:
+                        if(result.containsValue(3))
+                            return 7;
+                        else
+                            return 4;
+                    case 9:
+                        if(result.containsValue(1)) {
+                            return 9;
+                        }else {
+                            return 8;
+                        }
+                    case 10:
+                        return 10;
+                    case 11:
+                        return 11;
+                    case 12:
+                        return 12;
+                    default:
+                        return 0;
                 }
             }
-            break;
-        case "N":
-            lastX=lastX+1;
-            while(place==true) {
-                if(lastX<plateau.length) {
-                    if(plateau[lastX][lastY].equals("X")) {
-                        nbJetonAligne=nbJetonAligne+1;
-                        lastX=lastX+1;
-                    }else {
-                        place=false;
-                    }
-                }else {
-                    place=false;
+        }else {
+            int totdir1=1;
+            int totdir2=1;
+            int totdir3=1;
+            int totdir4=1;
+            int somme=0;
+            int gau=evaluationDirectionAdv(plateau, coup, "G");
+            int d=evaluationDirectionAdv(plateau, coup, "D");
+            totdir1+=gau+d;
+            result.put("G+D",totdir1);
+            somme+=result.get("G+D");
+            gau=evaluationDirectionAdv(plateau, coup, "GN");
+            d=evaluationDirectionAdv(plateau, coup, "DS");
+            totdir2+=gau+d;
+            result.put("GS+DS",totdir2);
+            somme+=totdir2;
+            gau=evaluationDirectionAdv(plateau, coup, "DN");
+            d=evaluationDirectionAdv(plateau, coup, "GS");
+            totdir3+=gau+d;
+            result.put("DN+GS",totdir3);
+            somme+=result.get("DN+GS");
+            gau=evaluationDirectionAdv(plateau, coup, "N");
+            d=evaluationDirectionAdv(plateau, coup, "S");
+            totdir4+=gau+d;
+            result.put("NS", totdir4);
+            somme+=totdir4;
+            //System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
+            if(result.containsValue(4)) {
+                return -15;
+            }else {
+                switch (somme) {
+                    case 4:
+                        return 0;
+                    case 5:
+                        return -1;
+                    case 6:
+                        if(!result.containsValue(3))
+                            return -2;
+                        else
+                            return -5;
+                    case 7:
+                        if(result.containsValue(3))
+                            return -6;
+                        else
+                            return -4;
+                    case 8:
+                        if(result.containsValue(3))
+                            return -7;
+                        else
+                            return -4;
+                    case 9:
+                        if(result.containsValue(1)) {
+                            return -9;
+                        }else {
+                            return -8;
+                        }
+                    case 10:
+                        return -10;
+                    case 11:
+                        return -11;
+                    case 12:
+                        return -12;
+                    default:
+                        return 0;
                 }
             }
-            break;
-        case "DN":
-            lastX=lastX+1;
-            lastY=lastY+1;
-            while(place==true) {
-                if(lastX<plateau.length&&lastY<7) {
-                    if(plateau[lastX][lastY].equals("X")) {
-                        nbJetonAligne=nbJetonAligne+1;
-                        lastX=lastX+1;
-                        lastY=lastY+1;
-                    }else {
-                        place=false;
-                    }
-                }else {
-                    place=false;
-                }
-            }
-            break;
-        case "D":
-            lastY=lastY+1;
-            while(place==true) {
-                if(lastY<7) {
-                    if(plateau[lastX][lastY].equals("X")) {
-                        nbJetonAligne=nbJetonAligne+1;
-                        lastY=lastY+1;
-                    }else {
-                        place=false;
-                    }
-                }else {
-                    place=false;
-                }
-            }
-            break;
-        case "DS":
-            lastX=lastX-1;
-            lastY=lastY+1;
-            while(place==true) {
-                if(lastX>=0&&lastY<7) {
-                    if(plateau[lastX][lastY].equals("X")) {
-                        nbJetonAligne=nbJetonAligne+1;
-                        lastX=lastX-1;
-                        lastY=lastY+1;
-                    }else {
-                        place=false;
-                    }
-                }else {
-                    place=false;
-                }
-            }
-            break;
-        case "S":
-            lastX=lastX-1;
-            while(place==true) {
-                if(lastX>=0) {
-                    if(plateau[lastX][lastY].equals("X")) {
-                        nbJetonAligne=nbJetonAligne+1;
-                        lastX=lastX-1;
-                    }else {
-                        place=false;
-                    }
-                }else {
-                    place=false;
-                }
-            }
-            break;
-        case "GS":
-            lastX=lastX-1;
-            lastY=lastY-1;
-            while(place==true) {
-                if(lastX>=0&&lastY>=0) {
-                    if(plateau[lastX][lastY].equals("X")) {
-                        nbJetonAligne=nbJetonAligne+1;
-                        lastX=lastX-1;
-                        lastY=lastY-1;
-                    }else {
-                        place=false;
-                    }
-                }else {
-                    place=false;
-                }
-            }
-            break;
-        case "G":
-            lastY=lastY-1;
-            while(place==true) {
-                if(lastY>=0) {
-                    if(plateau[lastX][lastY].equals("X")) {
-                        nbJetonAligne=nbJetonAligne+1;
-                        lastY=lastY-1;
-                    }else {
-                        place=false;
-                    }
-                }else {
-                    place=false;
-                }
-            }
-            break;
+        }
     }
-    return nbJetonAligne;
-}
+    private int evaluationDirectionAdv(String[][] plateau, int[] coup, String direction) {
+        // TODO Auto-generated method stub
+        boolean place=true;
+        int nbJetonAligne=0;
+        int lastX=coup[0];
+        int lastY=coup[1];
+        switch (direction) {
+            case "GN":
+                lastX=lastX+1;
+                lastY=lastY-1;
+                while(place==true) {
+                    if(lastX<plateau.length&&lastY>=0) {
+                        if(plateau[lastX][lastY].equals("X")) {
+                            nbJetonAligne=nbJetonAligne+1;
+                            lastX=lastX+1;
+                            lastY=lastY-1;
+                        }else {
+                            place=false;
+                        }
+                    }else {
+                        place=false;
+                    }
+                }
+                break;
+            case "N":
+                lastX=lastX+1;
+                while(place==true) {
+                    if(lastX<plateau.length) {
+                        if(plateau[lastX][lastY].equals("X")) {
+                            nbJetonAligne=nbJetonAligne+1;
+                            lastX=lastX+1;
+                        }else {
+                            place=false;
+                        }
+                    }else {
+                        place=false;
+                    }
+                }
+                break;
+            case "DN":
+                lastX=lastX+1;
+                lastY=lastY+1;
+                while(place==true) {
+                    if(lastX<plateau.length&&lastY<7) {
+                        if(plateau[lastX][lastY].equals("X")) {
+                            nbJetonAligne=nbJetonAligne+1;
+                            lastX=lastX+1;
+                            lastY=lastY+1;
+                        }else {
+                            place=false;
+                        }
+                    }else {
+                        place=false;
+                    }
+                }
+                break;
+            case "D":
+                lastY=lastY+1;
+                while(place==true) {
+                    if(lastY<7) {
+                        if(plateau[lastX][lastY].equals("X")) {
+                            nbJetonAligne=nbJetonAligne+1;
+                            lastY=lastY+1;
+                        }else {
+                            place=false;
+                        }
+                    }else {
+                        place=false;
+                    }
+                }
+                break;
+            case "DS":
+                lastX=lastX-1;
+                lastY=lastY+1;
+                while(place==true) {
+                    if(lastX>=0&&lastY<7) {
+                        if(plateau[lastX][lastY].equals("X")) {
+                            nbJetonAligne=nbJetonAligne+1;
+                            lastX=lastX-1;
+                            lastY=lastY+1;
+                        }else {
+                            place=false;
+                        }
+                    }else {
+                        place=false;
+                    }
+                }
+                break;
+            case "S":
+                lastX=lastX-1;
+                while(place==true) {
+                    if(lastX>=0) {
+                        if(plateau[lastX][lastY].equals("X")) {
+                            nbJetonAligne=nbJetonAligne+1;
+                            lastX=lastX-1;
+                        }else {
+                            place=false;
+                        }
+                    }else {
+                        place=false;
+                    }
+                }
+                break;
+            case "GS":
+                lastX=lastX-1;
+                lastY=lastY-1;
+                while(place==true) {
+                    if(lastX>=0&&lastY>=0) {
+                        if(plateau[lastX][lastY].equals("X")) {
+                            nbJetonAligne=nbJetonAligne+1;
+                            lastX=lastX-1;
+                            lastY=lastY-1;
+                        }else {
+                            place=false;
+                        }
+                    }else {
+                        place=false;
+                    }
+                }
+                break;
+            case "G":
+                lastY=lastY-1;
+                while(place==true) {
+                    if(lastY>=0) {
+                        if(plateau[lastX][lastY].equals("X")) {
+                            nbJetonAligne=nbJetonAligne+1;
+                            lastY=lastY-1;
+                        }else {
+                            place=false;
+                        }
+                    }else {
+                        place=false;
+                    }
+                }
+                break;
+        }
+        return nbJetonAligne;
+    }
     private int evaluationDirection(String[][] plateau, int[] coup, String direction, boolean b) {
         // TODO Auto-generated method stub
         boolean place=true;
@@ -804,7 +812,15 @@ private int evaluationDirectionAdv(String[][] plateau, int[] coup, String direct
                 coupAJouer=entry.getKey();     // Print the key with max value
             }
         }
-        this.plateaux[coupAJouer[0]][coupAJouer[1]]="X";
+        this.plateausortie[coupAJouer[0]][coupAJouer[1]]="X";
+        String str="";
+        for(int i=(this.plateausortie.length-1);i>=0;i--) {
+            for(int j=0;j<this.plateausortie[i].length;j++) {
+                str+=this.plateausortie[i][j];
+            }
+            str+="\n";
+        }
+        System.out.println(str);
         exportGame();
     }
     //determine si la partie est finie
@@ -841,44 +857,44 @@ private int evaluationDirectionAdv(String[][] plateau, int[] coup, String direct
                 boolean win=false;
                 boolean loose=false;
                 for(int i=0;i<p.plateaux.length;i++) {
-                	for(int j=0;j<p.plateaux[i].length;j++) {
-                		if(p.evaluationPoint(p.plateaux,new int[] {i,j},true)==15||p.evaluationPoint(p.plateaux,new int[] {i,j}, false)==-15) {
-                			if(p.evaluationPoint(p.plateaux, new int[] {i,j},true)==15) {
-                				System.out.println("ici");
-                				win=true;
-                			}else {
-                				loose=true;
-                			}
-                		}
-                	}
+                    for(int j=0;j<p.plateaux[i].length;j++) {
+                        if(p.evaluationPoint(p.plateaux,new int[] {i,j},true)==15||p.evaluationPoint(p.plateaux,new int[] {i,j}, false)==-15) {
+                            if(p.evaluationPoint(p.plateaux, new int[] {i,j},true)==15) {
+                                System.out.println("ici");
+                                win=true;
+                            }else {
+                                loose=true;
+                            }
+                        }
+                    }
                 }
                 System.out.println(win);
                 if(possibility.size()>0&&win==false&&loose==false) {
-                	Random rand =new Random();
-                	HashMap<int[], Integer> accuValue=new HashMap<int[], Integer>();
-                	int[] key= {};
-                	ArrayList<int[]>listKey=new ArrayList<int[]>();
-                	int[] k=new int[] {3};
-                	listKey.add(new int[]{0});
-                	listKey.add(new int[]{1});
-                	listKey.add(new int[]{2});
-                	listKey.add(k);
-                	accuValue.put(k, 0);
-                	//accuValue=p.bestPossibilities(p.plateaux, possibility);
-                	p.bestPlay2(p.plateaux, accuValue, 1,3,listKey);
-                	//int n=rand.nextInt(possibility.size());
-                	//p.play(possibility.get(n)[0], possibility.get(n)[1]);
+                    Random rand =new Random();
+                    HashMap<int[], Integer> accuValue=new HashMap<int[], Integer>();
+                    int[] key= {};
+                    ArrayList<int[]>listKey=new ArrayList<int[]>();
+                    int[] k=new int[] {3};
+                    listKey.add(new int[]{0});
+                    listKey.add(new int[]{1});
+                    listKey.add(new int[]{2});
+                    listKey.add(k);
+                    accuValue.put(k, 0);
+                    //accuValue=p.bestPossibilities(p.plateaux, possibility);
+                    p.bestPlay2(p.plateaux, accuValue, 1,3,listKey);
+                    //int n=rand.nextInt(possibility.size());
+                    //p.play(possibility.get(n)[0], possibility.get(n)[1]);
                 }else {
-                	if(possibility.size()<=0) {
-                		System.out.println("le plateau est plein !!");
-                	}else {
-                		if(win==true) {
-                			
-                			System.out.println("la partie est gagner rentrez un fichier valide");
-                		}else {
-                			System.out.println("la partie est perdue rentrez un fichier valide ");
-                		}
-                	}
+                    if(possibility.size()<=0) {
+                        System.out.println("le plateau est plein !!");
+                    }else {
+                        if(win==true) {
+
+                            System.out.println("la partie est gagner rentrez un fichier valide");
+                        }else {
+                            System.out.println("la partie est perdue rentrez un fichier valide ");
+                        }
+                    }
                 }
                 //p.exportGame();
             }else {
