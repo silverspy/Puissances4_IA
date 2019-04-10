@@ -101,7 +101,7 @@ public class Puissances4 {
     }
     //to test
     public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivityLevel,int branchKey,List<int[]> listBranchKey) {
-        if(branchKey==2&&recursivityLevel>=6) {
+        if(branchKey==2&&recursivityLevel>=12) {
             System.out.println("on joue ici");
             playBestScore(accuValue, this.plateaux);
             return;
@@ -124,7 +124,7 @@ public class Puissances4 {
             System.out.println(" \n");
             if(accuValue.get(listBranchKey.get(branchKey))==-15||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
             }else {
-                if(accuValue.get(listBranchKey.get(branchKey))==15||accuValue.get(listBranchKey.get(branchKey))==12||accuValue.get(listBranchKey.get(branchKey))==11||accuValue.get(listBranchKey.get(branchKey))==10||accuValue.get(listBranchKey.get(branchKey))==9) {
+                if(accuValue.get(listBranchKey.get(branchKey))==15||accuValue.get(listBranchKey.get(branchKey))==16||accuValue.get(listBranchKey.get(branchKey))==12||accuValue.get(listBranchKey.get(branchKey))==11||accuValue.get(listBranchKey.get(branchKey))==10||accuValue.get(listBranchKey.get(branchKey))==9) {
                     plateauCourant=simulationCoup(this.plateaux,listBranchKey.get(branchKey+1));
                     System.out.println("ici on joue");
                     playBestScore(accuValue, plateauCourant);
@@ -393,6 +393,39 @@ public class Puissances4 {
     public int evaluationPoint(String[][] plateau,int[] coup,boolean joueur){
         HashMap<String, Integer> result=new HashMap<String, Integer>();
         if(joueur) {
+            int totdir1a=1;
+            int totdir2a=1;
+            int totdir3a=1;
+            int totdir4a=1;
+            int sommea=0;
+            int gaua=evaluationDirectionAdv(plateau, coup, "G");
+            int da=evaluationDirectionAdv(plateau, coup, "D");
+            totdir1a+=gaua+da;
+            result.put("G+D",totdir1a);
+            sommea+=result.get("G+D");
+            gaua=evaluationDirectionAdv(plateau, coup, "GN");
+            da=evaluationDirectionAdv(plateau, coup, "DS");
+            totdir2a+=gaua+da;
+            result.put("GS+DS",totdir2a);
+            sommea+=totdir2a;
+            gaua=evaluationDirectionAdv(plateau, coup, "DN");
+            da=evaluationDirectionAdv(plateau, coup, "GS");
+            totdir3a+=gaua+da;
+            result.put("DN+GS",totdir3a);
+            sommea+=result.get("DN+GS");
+            gaua=evaluationDirectionAdv(plateau, coup, "N");
+            da=evaluationDirectionAdv(plateau, coup, "S");
+            totdir4a+=gaua+da;
+            result.put("NS", totdir4a);
+            sommea+=totdir4a;
+            //System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
+            int k=0;
+            if(result.containsValue(4)) {
+                k=-15;
+            }
+            if(k==-15){
+                return 16;
+            }
             int totdir1=1;
             int totdir2=1;
             int totdir3=1;
@@ -459,6 +492,42 @@ public class Puissances4 {
                 }
             }
         }else {
+            int totdir1a=1;
+            int totdir2a=1;
+            int totdir3a=1;
+            int totdir4a=1;
+            int sommea=0;
+            int gaua=evaluationDirection(plateau, coup, "G");
+            int da=evaluationDirection(plateau, coup, "D");
+            totdir1a+=gaua+da;
+            result.put("G+D",totdir1a);
+            sommea+=result.get("G+D");
+            gaua=evaluationDirection(plateau, coup, "GN");
+            da=evaluationDirection(plateau, coup, "DS");
+            totdir2a+=gaua+da;
+            result.put("GS+DS",totdir2a);
+            sommea+=totdir2a;
+            gaua=evaluationDirection(plateau, coup, "DN");
+            da=evaluationDirection(plateau, coup, "GS");
+            totdir3a+=gaua+da;
+            result.put("DN+GS",totdir3a);
+            sommea+=result.get("DN+GS");
+            gaua=evaluationDirection(plateau, coup, "N");
+            da=evaluationDirection(plateau, coup, "S");
+            totdir4a+=gaua+da;
+            result.put("NS", totdir4a);
+            sommea+=totdir4a;
+            //System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
+            int k=0;
+            if(result.containsValue(4)) {
+                k=-15;
+            }
+            if(k==-15){
+                return -16;
+            }
+            if(evaluationPoint(plateau,coup,true)==16){
+                return -16;
+            }
             int totdir1=1;
             int totdir2=1;
             int totdir3=1;
@@ -868,6 +937,8 @@ public class Puissances4 {
                         }
                     }
                 }
+                win=false;
+                loose=false;
                 System.out.println(win);
                 if(possibility.size()>0&&win==false&&loose==false) {
                     Random rand =new Random();
