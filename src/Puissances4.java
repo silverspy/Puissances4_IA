@@ -85,7 +85,7 @@ public class Puissances4 {
     //renvoie une arrayList des coups possibles
     public ArrayList<int[]> Possibilities(String[][] plateau){
         ArrayList<int[]> possibilities=new ArrayList<int[]>();
-        if(!gameLost()) {
+        if(!gameLost(plateau)&&!gameWon(plateau)) {
             for(int numCol=0;numCol<7;numCol++) {
                 if(possibilityCol(numCol,plateau)!=-1) {
                     int []t = {possibilityCol(numCol,plateau),numCol};
@@ -98,84 +98,121 @@ public class Puissances4 {
 
     public void play(int x,int y) {
         this.plateaux[x][y]="O";
+        this.plateausortie[x][y]="O";
     }
-    //to test
-    public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivityLevel,int branchKey,List<int[]> listBranchKey) {
-        if(branchKey==2&&recursivityLevel>=3) {
-            System.out.println("on joue ici");
-            playBestScore(accuValue, this.plateaux);
-            return;
-        }else {
-            System.out.println("\n niveau recursivit� : "+recursivityLevel);
-            System.out.println("branch key : "+branchKey);
-            System.out.println("branche explor�e :" +Arrays.toString(listBranchKey.get(branchKey)));
-            System.out.print("list : ");
-            for(int[] t:listBranchKey) {
-                System.out.print(Arrays.toString(t)+" : ");
-            }
-            System.out.print("\n");
-            System.out.println(Arrays.deepToString(plateauCourant));
-            System.out.print(" hashmap :");
-            for (int[] name: accuValue.keySet()){
-                String key = Arrays.toString(name);
-                String value = accuValue.get(name).toString();
-                System.out.print(key + "=>" + value+" ;");
-            }
-            System.out.println(" \n");
-            if(accuValue.containsValue(17)||accuValue.containsValue(16)||accuValue.get(listBranchKey.get(branchKey))==12||accuValue.get(listBranchKey.get(branchKey))==11||accuValue.get(listBranchKey.get(branchKey))==10||accuValue.get(listBranchKey.get(branchKey))==9) {
-                plateauCourant=simulationCoup(this.plateaux,listBranchKey.get(branchKey+1));
-                System.out.println("ici on joue");
-                playBestScore(accuValue, plateauCourant);
-                return;
-             }else {
-                if(accuValue.get(listBranchKey.get(branchKey))==-17||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
-                }else {
-                    if(recursivityLevel%2==0) {
-                        if(recursivityLevel!=6) {
-                            HashMap<int[], Integer> bestPossib=bestPossibAdv(plateauCourant);
-                            int [] coupAJouer=new int[2];
-                            int maxValueInMap=(Collections.min(bestPossib.values()));
-                            System.out.println(maxValueInMap);
-                            for (Entry<int[], Integer> entry : bestPossib.entrySet()) {  // Itrate through hashmap
-                                if (entry.getValue()==maxValueInMap) {
-                                    coupAJouer=entry.getKey();     // Print the key with max value
-                                }
-                            }
-                            System.out.println("min value : "+maxValueInMap);
-                            String[][] plateauAdv=simulatePlateauAdv(plateauCourant,coupAJouer);
-                            accuValue.replace(listBranchKey.get(branchKey), bestPossib.get(coupAJouer));
-                            bestPlay2(plateauAdv, accuValue, recursivityLevel+1, branchKey, listBranchKey);
-                        }
-
-                    }else {
-                        if(branchKey==3) {
-                            ArrayList<int[]> possibilities=Possibilities(this.plateaux);
-                            HashMap<int[],Integer> mapPossibilities=bestPossibilities(this.plateaux,possibilities);
-                            String [][] plateauSimul;
-                            int indice=0;
-                            for(int[] key:mapPossibilities.keySet()) {
-                                plateauSimul=simulationCoup(this.plateaux,key);
-                                recursivityLevel=1;
-                                bestPlay2(plateauSimul, mapPossibilities, (recursivityLevel+1),indice,new ArrayList<int[]>(mapPossibilities.keySet()));
-                                indice++;
-                            }
-                        }else {
-                            System.out.println("player turn but not during the first turn");
-                            ArrayList<int[]> possibilities=Possibilities(plateauCourant);
-                            HashMap<int[],Integer> mapPossibilities=bestPossibilities(plateauCourant,possibilities);
-                            String [][] plateauSimul;
-                            for(int[] key:mapPossibilities.keySet()) {
-                                plateauSimul=simulationCoup(plateauCourant,key);
-                                accuValue.put(listBranchKey.get(branchKey), mapPossibilities.get(key));
-                                bestPlay2(plateauSimul, accuValue, (recursivityLevel+1), branchKey,listBranchKey);
-                            }
-                        }
-                    }
+    public void bestPlay3(String[][] plateau) {
+    	ArrayList<int[]>possibilities=new ArrayList<int[]>();
+    	ArrayList<int[]>possibilities1=new ArrayList<int[]>();
+    	ArrayList<int[]>possibilities2=new ArrayList<int[]>();
+    	ArrayList<int[]>possibilities3=new ArrayList<int[]>();
+    	ArrayList<int[]>possibilities4=new ArrayList<int[]>();
+    	possibilities=Possibilities(plateau);
+    	String[][] plateau1;
+    	String[][] plateau2;
+    	String[][] plateau3;
+    	String[][] plateau4;
+    	String[][] plateau5;
+    	int somme=0;
+    	HashMap<int[], Integer> countScore=new HashMap<int[], Integer>();
+    	if(possibilities.size()>0) {
+    		for(int[] coup:possibilities) {
+    			countScore.put(coup, 0);
+    		}
+    		for(int[] coup:possibilities) {
+    			System.out.println("lv 1");
+    			System.out.print(" hashmap :");
+                for (int[] name: countScore.keySet()){
+                    String key = Arrays.toString(name);
+                    String value = countScore.get(name).toString();
+                    System.out.print(key + "=>" + value+" ;");
                 }
-            }
-        }
-    }
+                System.out.println(" \n");
+    			plateau1=simulationCoup(plateau, coup);
+    			somme=countScore.get(coup)+evaluationPoint2(plateau, coup, true);
+    			countScore.replace(coup, somme);
+    			possibilities1=Possibilities(plateau1);
+    			if(possibilities1.size()>0) {
+    				for(int[] coupAdv:possibilities1) {
+    					System.out.println("lv 2");
+    					plateau2=simulatePlateauAdv(plateau1, coupAdv);
+    					somme= countScore.get(coup)+evaluationPoint2(plateau1, coupAdv, false);
+    					countScore.replace(coup,somme);
+    					possibilities2=Possibilities(plateau2);
+    					if(possibilities2.size()>0) {
+    						for(int[] coup2:possibilities2) {
+    							System.out.println("lv 3");
+    							plateau3=simulationCoup(plateau2, coup2);
+    							somme= countScore.get(coup)+evaluationPoint2(plateau2, coup2, true);
+    							countScore.replace(coup,somme);
+    							possibilities3=Possibilities(plateau3);
+    							if(possibilities3.size()>0) {
+    								for(int[] coupAdv2:possibilities3) {
+    									System.out.println("lv 4");
+    									plateau4=simulatePlateauAdv(plateau3, coupAdv2);
+    									countScore.replace(coup, countScore.get(coup)+evaluationPoint2(plateau3, coupAdv2, false));
+    			    					possibilities4=Possibilities(plateau4);
+    			    					if(possibilities4.size()>0) {
+    			    						for(int[] coup3:possibilities4) {
+    			    							System.out.println("lv 5");
+    			    							plateau3=simulationCoup(plateau4, coup3);
+    			    							countScore.replace(coup, countScore.get(coup)+evaluationPoint2(plateau4, coup3, true));
+    			    						}
+    			    					}else {
+    	    								if(this.gameWon(plateau4)) {
+    	    									somme= countScore.get(coup)+100;
+    	    									countScore.replace(coup,somme);
+    	    								}else {
+    	    									somme= countScore.get(coup)-100;
+    	    									countScore.replace(coup,somme);
+    	    								}
+    	    							}
+    								}
+    							}else {
+    								if(this.gameWon(plateau3)) {
+    									somme= countScore.get(coup)+100;
+    									countScore.replace(coup,somme);
+    								}else {
+    									somme= countScore.get(coup)-100;
+    									countScore.replace(coup,somme);
+    								}
+    							}
+    						}
+    					}else {
+    						if(this.gameWon(plateau2)) {
+    							somme= countScore.get(coup)+100;
+    							countScore.replace(coup,somme);
+    						}else {
+    							somme= countScore.get(coup)-100;
+    							countScore.replace(coup,somme);
+    						}
+    					}
+    				}
+    			}else {
+					if(this.gameWon(plateau1)) {
+						somme= countScore.get(coup)+100;
+						countScore.replace(coup,somme);
+					}else {
+						somme= countScore.get(coup)-100;
+						countScore.replace(coup,somme);
+					}
+				}
 
+    		}
+			int[] coupajouer=new int[2];
+			int maxValueInMap=(Collections.max(countScore.values()));  // This will return max value in the Hashmap
+		    for (Entry<int[], Integer> entry : countScore.entrySet()) {
+		    	System.out.println("key :"+entry.getKey()+ "valeur : "+entry.getValue());// Itrate through hashmap
+		    	if (entry.getValue()==maxValueInMap) {
+		    		coupajouer=entry.getKey();     // Print the key with max value
+		        }
+		    }
+		    System.out.println("play here");
+		    System.out.println(Arrays.toString(coupajouer));
+		    play(coupajouer[0], coupajouer[1]);
+		    
+    	}
+    }
+   
     private HashMap<int[], Integer> bestPossibAdv(String[][] plateauCourant) {
         //System.out.println("dans best Possib adv");
         ArrayList<int[]> poss=Possibilities(plateauCourant);
@@ -395,6 +432,117 @@ public class Puissances4 {
 //GS gauche sud x-1 y-1
 //ect
 //peut etre rajout� un boolean pour indiquer si joueur ou non pour reutiliser code
+    public int evaluationPoint2(String[][] plateau,int[] coup,boolean joueur) {
+    			if(gameLost(plateau)) {
+    				return -100;
+    			}
+    			if(gameWon(plateau)) {
+    				return 100;
+    			}
+    	        HashMap<String, Integer> result=new HashMap<String, Integer>();
+    	        if(joueur) {
+    	            int totdir1a=1;
+    	            int totdir2a=1;
+    	            int totdir3a=1;
+    	            int totdir4a=1;
+    	            int sommea=0;
+    	            int gaua=evaluationDirectionAdv(plateau, coup, "G");
+    	            int da=evaluationDirectionAdv(plateau, coup, "D");
+    	            totdir1a+=gaua+da;
+    	            result.put("G+D",totdir1a);
+    	            sommea+=result.get("G+D");
+    	            gaua=evaluationDirectionAdv(plateau, coup, "GN");
+    	            da=evaluationDirectionAdv(plateau, coup, "DS");
+    	            totdir2a+=gaua+da;
+    	            result.put("GS+DS",totdir2a);
+    	            sommea+=totdir2a;
+    	            gaua=evaluationDirectionAdv(plateau, coup, "DN");
+    	            da=evaluationDirectionAdv(plateau, coup, "GS");
+    	            totdir3a+=gaua+da;
+    	            result.put("DN+GS",totdir3a);
+    	            sommea+=result.get("DN+GS");
+    	            gaua=evaluationDirectionAdv(plateau, coup, "N");
+    	            da=evaluationDirectionAdv(plateau, coup, "S");
+    	            totdir4a+=gaua+da;
+    	            result.put("NS", totdir4a);
+    	            sommea+=totdir4a;
+    	            //System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
+    	            int k=0;
+    	            if(result.containsValue(4)) {
+    	                k=-15;
+    	            }
+    	            if(k==-15){
+    	                return 16;
+    	            }
+    	            int totdir1=1;
+    	            int totdir2=1;
+    	            int totdir3=1;
+    	            int totdir4=1;
+    	            int somme=0;
+    	            int gau=evaluationDirection(plateau, coup, "G");
+    	            int d=evaluationDirection(plateau, coup, "D");
+    	            totdir1+=gau+d;
+    	            result.put("G+D",totdir1);
+    	            somme+=result.get("G+D");
+    	            gau=evaluationDirection(plateau, coup, "GN");
+    	            d=evaluationDirection(plateau, coup, "DS");
+    	            totdir2+=gau+d;
+    	            result.put("GS+DS",totdir2);
+    	            somme+=totdir2;
+    	            gau=evaluationDirection(plateau, coup, "DN");
+    	            d=evaluationDirection(plateau, coup, "GS");
+    	            totdir3+=gau+d;
+    	            result.put("DN+GS",totdir3);
+    	            somme+=result.get("DN+GS");
+    	            gau=evaluationDirection(plateau, coup, "N");
+    	            d=evaluationDirection(plateau, coup, "S");
+    	            totdir4+=gau+d;
+    	            result.put("NS", totdir4);
+    	            somme+=totdir4;
+    	            //System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
+    	            if(result.containsValue(4)) {
+    	                return 17;
+    	            }else {
+    	                switch (somme) {
+    	                    case 4:
+    	                        return 0;
+    	                    case 5:
+    	                        return 1;
+    	                    case 6:
+    	                        if(!result.containsValue(3))
+    	                            return 2;
+    	                        else
+    	                            return 5;
+    	                    case 7:
+    	                        if(result.containsValue(3))
+    	                            return 6;
+    	                        else
+    	                            return 4;
+    	                    case 8:
+    	                        if(result.containsValue(3))
+    	                            return 7;
+    	                        else
+    	                            return 4;
+    	                    case 9:
+    	                        if(result.containsValue(1)) {
+    	                            return 9;
+    	                        }else {
+    	                            return 8;
+    	                        }
+    	                    case 10:
+    	                        return 10;
+    	                    case 11:
+    	                        return 11;
+    	                    case 12:
+    	                        return 12;
+    	                    default:
+    	                        return 0;
+    	                }
+    	            }
+    	        }else {
+    	        	return evaluationPoint2(plateau, coup, true)*-1;
+    	        }
+    }
     public int evaluationPoint(String[][] plateau,int[] coup,boolean joueur){
         HashMap<String, Integer> result=new HashMap<String, Integer>();
         if(joueur) {
@@ -876,66 +1024,46 @@ public class Puissances4 {
         }
         return nbJetonAligne;
     }
-    //joue le meilleur score possible pour le joueur (valeur la plus eleve de la hashmap pass key[0] et key[1] a la fonction play qui se charge du reste
-    private void playBestScore(HashMap<int[], Integer> accuValue, String[][] plateaux2) {
-        // TODO Auto-generated method stub
-        int [] coupAJouer=new int[2];
-        int maxValueInMap=(Collections.max(accuValue.values()));
-        for (Entry<int[], Integer> entry : accuValue.entrySet()) {  // Itrate through hashmap
-            if (entry.getValue()==maxValueInMap) {
-                coupAJouer=entry.getKey();     // Print the key with max value
-            }
-        }
-        this.plateausortie[coupAJouer[0]][coupAJouer[1]]="O";
-        String str="";
-        for(int i=(this.plateausortie.length-1);i>=0;i--) {
-            for(int j=0;j<this.plateausortie[i].length;j++) {
-                str+=this.plateausortie[i][j];
-            }
-            str+="\n";
-        }
-        System.out.println(str);
-        exportGame();
-    }
+
     //determine si la partie est finie
-    private boolean gameLostRigth(int i, int j){
+    private boolean gameLostRigth(String[][] plateaux,int i, int j,String t){
         if (j+3 > 6){
             return false;
         }else{
-            if(this.plateaux[i][j].equals("X") && this.plateaux[i][j+1].equals("X") && this.plateaux[i][j+2].equals("X") && this.plateaux[i][j+3].equals("X")){
+            if(plateaux[i][j].equals(t) && plateaux[i][j+1].equals(t) && plateaux[i][j+2].equals(t) && plateaux[i][j+3].equals(t)){
                 return true;
             }else{
                 return false;
             }
         }
     }
-    private boolean gameLostLeft(int i, int j){
+    private boolean gameLostLeft(String[][] plateaux,int i, int j,String t){
         if (j-3 < 0){
             return false;
         }else{
-            if(this.plateaux[i][j].equals("X") && this.plateaux[i][j-1].equals("X") && this.plateaux[i][j-2].equals("X") && this.plateaux[i][j-3].equals("X")){
+            if(plateaux[i][j].equals(t) && plateaux[i][j-1].equals(t) && plateaux[i][j-2].equals(t) && plateaux[i][j-3].equals(t)){
                 return true;
             }else{
                 return false;
             }
         }
     }
-    private boolean gameLostBot(int i, int j){
+    private boolean gameLostBot(String[][] plateaux,int i, int j,String t){
         if (i-3 < 0){
             return false;
         }else{
-            if(this.plateaux[i][j].equals("X") && this.plateaux[i-1][j].equals("X") && this.plateaux[i-2][j].equals("X") && this.plateaux[i-3][j].equals("X")){
+            if(plateaux[i][j].equals(t) && plateaux[i-1][j].equals(t) && plateaux[i-2][j].equals(t) &&plateaux[i-3][j].equals(t)){
                 return true;
             }else{
                 return false;
             }
         }
     }
-    private boolean gameLostTop(int i, int j){
+    private boolean gameLostTop(String[][] plateaux,int i, int j,String t){
         if (i+3 > 5){
             return false;
         }else{
-            if(this.plateaux[i][j].equals("X") && this.plateaux[i+1][j].equals("X") && this.plateaux[i+2][j].equals("X") && this.plateaux[i+3][j].equals("X")){
+            if(plateaux[i][j].equals(t) && plateaux[i+1][j].equals(t) && plateaux[i+2][j].equals(t) && plateaux[i+3][j].equals(t)){
                 return true;
             }else{
                 return false;
@@ -943,11 +1071,11 @@ public class Puissances4 {
         }
     }
 
-    private boolean gameLostLeftBot(int i, int j){
+    private boolean gameLostLeftBot(String[][] plateaux,int i, int j,String t){
         if ((i-3 < 0)||(j-3<0)){
             return false;
         }else{
-            if(this.plateaux[i][j].equals("X") && this.plateaux[i-1][j-1].equals("X") && this.plateaux[i-2][j-2].equals("X") && this.plateaux[i-3][j-3].equals("X")){
+            if(plateaux[i][j].equals(t) && plateaux[i-1][j-1].equals(t) && plateaux[i-2][j-2].equals(t) && plateaux[i-3][j-3].equals(t)){
                 return true;
             }else{
                 return false;
@@ -955,11 +1083,11 @@ public class Puissances4 {
         }
     }
 
-    private boolean gameLostRightTop(int i, int j){
+    private boolean gameLostRightTop(String[][] plateaux,int i, int j,String t){
         if ((i+3 > 5)||(j+3 > 6)){
             return false;
         }else{
-            if(this.plateaux[i][j].equals("X") && this.plateaux[i+1][j+1].equals("X") && this.plateaux[i+2][j+2].equals("X") && this.plateaux[i+3][j+3].equals("X")){
+            if(plateaux[i][j].equals(t) && plateaux[i+1][j+1].equals(t) && plateaux[i+2][j+2].equals(t) && plateaux[i+3][j+3].equals(t)){
                 return true;
             }else{
                 return false;
@@ -967,11 +1095,11 @@ public class Puissances4 {
         }
     }
 
-    private boolean gameLostRightBot(int i, int j){
+    private boolean gameLostRightBot(String[][] plateau,int i, int j,String t){
         if ((i+3 > 5)||(j-3 < 0)){
             return false;
         }else{
-            if(this.plateaux[i][j].equals("X") && this.plateaux[i+1][j-1].equals("X") && this.plateaux[i+2][j-2].equals("X") && this.plateaux[i+3][j-3].equals("X")){
+            if(plateau[i][j].equals(t) && plateau[i+1][j-1].equals(t) && plateau[i+2][j-2].equals(t) && plateau[i+3][j-3].equals(t)){
                 return true;
             }else{
                 return false;
@@ -979,11 +1107,11 @@ public class Puissances4 {
         }
     }
 
-    private boolean gameLostLeftTop(int i, int j){
+    private boolean gameLostLeftTop(String[][] plateau,int i, int j,String t){
         if ((i-3 < 0)||(j+3 > 6)){
             return false;
         }else{
-            if(this.plateaux[i][j].equals("X") && this.plateaux[i-1][j+1].equals("X") && this.plateaux[i-2][j+2].equals("X") && this.plateaux[i-3][j+3].equals("X")){
+            if(plateau[i][j].equals(t) && plateau[i-1][j+1].equals(t) && plateau[i-2][j+2].equals(t) && plateau[i-3][j+3].equals(t)){
                 return true;
             }else{
                 return false;
@@ -992,11 +1120,22 @@ public class Puissances4 {
     }
 
     //determine si la partie est finie
-    private boolean gameLost() {
-        for(int i=0;i<this.plateaux.length;i++) {
-            for (int j = 0; j < this.plateaux[i].length; j++) {
-                if (gameLostBot(i,j) || gameLostLeft(i,j) || gameLostLeftBot(i,j) || gameLostLeftTop(i, j) ||
-                        gameLostRightBot(i, j)|| gameLostRightTop(i,j) || gameLostRigth(i, j) || gameLostTop(i, j)){
+    private boolean gameLost(String[][] plateau) {
+        for(int i=0;i<plateau.length;i++) {
+            for (int j = 0; j < plateau[i].length; j++) {
+                if (gameLostBot(plateau,i,j,"X") || gameLostLeft(plateau,i,j,"X") || gameLostLeftBot(plateau,i,j,"X") || gameLostLeftTop(plateau,i, j,"X") ||
+                        gameLostRightBot(plateau,i, j,"X")|| gameLostRightTop(plateau,i,j,"X") || gameLostRigth(plateau,i, j,"X") || gameLostTop(plateau,i, j,"X")){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    private boolean gameWon(String[][] plateau) {
+        for(int i=0;i<plateau.length;i++) {
+            for (int j = 0; j < plateau[i].length; j++) {
+                if (gameLostBot(plateau,i,j,"O") || gameLostLeft(plateau,i,j,"O") || gameLostLeftBot(plateau,i,j,"O") || gameLostLeftTop(plateau,i, j,"O") ||
+                        gameLostRightBot(plateau,i, j,"O")|| gameLostRightTop(plateau,i,j,"O") || gameLostRigth(plateau,i, j,"O") || gameLostTop(plateau,i, j,"O")){
                     return true;
                 }
             }
@@ -1028,58 +1167,23 @@ public class Puissances4 {
             if(jeuxPre.exists()) {
 
                 p.changementJeux(args[0]);
-                ArrayList<int[]> possibility=p.Possibilities(p.plateaux);
-                for(int[] t:possibility){
-                    System.out.println(Arrays.toString(t));
-                }
-//                System.out.println(Arrays.toString(possibility.toArray()));
-                boolean win=false;
-                boolean loose=false;
-                for(int i=0;i<p.plateaux.length;i++) {
-                    for(int j=0;j<p.plateaux[i].length;j++) {
-                        if(p.evaluationPoint(p.plateaux,new int[] {i,j},true)==15||p.evaluationPoint(p.plateaux,new int[] {i,j}, false)==-15) {
-                            if(p.evaluationPoint(p.plateaux, new int[] {i,j},true)==15) {
-                                System.out.println("ici");
-                                win=true;
-                            }else {
-                                loose=true;
-                            }
-                        }
-                    }
-                }
-                win=false;
-                loose=false;
-                System.out.println(win);
-                if(possibility.size()>0&&win==false&&loose==false) {
-                    Random rand =new Random();
-                    HashMap<int[], Integer> accuValue=new HashMap<int[], Integer>();
-                    int[] key= {};
-                    ArrayList<int[]>listKey=new ArrayList<int[]>();
-                    int[] k=new int[] {3};
-                    listKey.add(new int[]{0});
-                    listKey.add(new int[]{1});
-                    listKey.add(new int[]{2});
-                    listKey.add(k);
-                    accuValue.put(k, 0);
-                    if(!p.gameLost()) {
-                        //accuValue=p.bestPossibilities(p.plateaux, possibility);
-                        p.bestPlay2(p.plateaux, accuValue, 1, 3, listKey);
-                    }
-                    //int n=rand.nextInt(possibility.size());
-                    //p.play(possibility.get(n)[0], possibility.get(n)[1]);
+                if(!p.gameLost(p.plateaux)&&!p.gameWon(p.plateaux)) {
+                	String[][] copiePlateau=new String[6][7];
+                	for(int i=0;i<p.plateaux.length;i++) {
+                		for(int j=0;j<p.plateaux[i].length;j++) {
+                			copiePlateau[i][j]=p.plateaux[i][j];
+                		}
+                	}
+                	p.bestPlay3(copiePlateau);
+                	p.exportGame();
                 }else {
-                    if(possibility.size()<=0) {
-                        System.out.println("le plateau est plein !!");
-                    }else {
-                        if(win==true) {
-
-                            System.out.println("la partie est gagner rentrez un fichier valide");
-                        }else {
-                            System.out.println("la partie est perdue rentrez un fichier valide ");
-                        }
-                    }
+                	if(p.gameWon(p.plateaux)) {
+                		System.out.println("won");
+                	}else {
+                		System.out.println("lost");
+                	}
                 }
-                //p.exportGame();
+                
             }else {
                 System.out.println("Indiquer un fichier existant");
             }
