@@ -1061,8 +1061,10 @@ public class Puissances4 {
                     listKey.add(new int[]{2});
                     listKey.add(k);
                     accuValue.put(k, 0);
-                    //accuValue=p.bestPossibilities(p.plateaux, possibility);
-                    p.bestPlay2(p.plateaux, accuValue, 1,3,listKey);
+                    if(!p.gameLost()) {
+                        //accuValue=p.bestPossibilities(p.plateaux, possibility);
+                        p.bestPlay2(p.plateaux, accuValue, 1, 3, listKey);
+                    }
                     //int n=rand.nextInt(possibility.size());
                     //p.play(possibility.get(n)[0], possibility.get(n)[1]);
                 }else {
