@@ -101,7 +101,7 @@ public class Puissances4 {
     }
     //to test
     public void bestPlay2(String [][] plateauCourant,HashMap<int[],Integer> accuValue,int recursivityLevel,int branchKey,List<int[]> listBranchKey) {
-        if(branchKey==2&&recursivityLevel>=12) {
+        if(branchKey==2&&recursivityLevel>=3) {
             System.out.println("on joue ici");
             playBestScore(accuValue, this.plateaux);
             return;
@@ -122,13 +122,13 @@ public class Puissances4 {
                 System.out.print(key + "=>" + value+" ;");
             }
             System.out.println(" \n");
-            if(accuValue.get(listBranchKey.get(branchKey))==-15||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
-            }else {
-                if(accuValue.get(listBranchKey.get(branchKey))==15||accuValue.get(listBranchKey.get(branchKey))==16||accuValue.get(listBranchKey.get(branchKey))==12||accuValue.get(listBranchKey.get(branchKey))==11||accuValue.get(listBranchKey.get(branchKey))==10||accuValue.get(listBranchKey.get(branchKey))==9) {
-                    plateauCourant=simulationCoup(this.plateaux,listBranchKey.get(branchKey+1));
-                    System.out.println("ici on joue");
-                    playBestScore(accuValue, plateauCourant);
-                    return;
+            if(accuValue.containsValue(17)||accuValue.containsValue(16)||accuValue.get(listBranchKey.get(branchKey))==12||accuValue.get(listBranchKey.get(branchKey))==11||accuValue.get(listBranchKey.get(branchKey))==10||accuValue.get(listBranchKey.get(branchKey))==9) {
+                plateauCourant=simulationCoup(this.plateaux,listBranchKey.get(branchKey+1));
+                System.out.println("ici on joue");
+                playBestScore(accuValue, plateauCourant);
+                return;
+             }else {
+                if(accuValue.get(listBranchKey.get(branchKey))==-17||accuValue.get(listBranchKey.get(branchKey))==-12||accuValue.get(listBranchKey.get(branchKey))==-11||accuValue.get(listBranchKey.get(branchKey))==-10||accuValue.get(listBranchKey.get(branchKey))==-9) {
                 }else {
                     if(recursivityLevel%2==0) {
                         if(recursivityLevel!=6) {
@@ -217,24 +217,29 @@ public class Puissances4 {
             res.add(evaluationPoint(plateaux2, coup,true));
             //System.out.println("eval point : "+Arrays.toString(coup)+" = "+evaluationPoint(plateaux2, coup, true));
         }
-        int max=Collections.max(res);
-        int indiceMax=res.indexOf(max);
-        //System.out.println(max);
-        accu.put(possibilities.get(res.indexOf(max)), max);
-        res.remove(indiceMax);
-        possibilities.remove(indiceMax);
-        max=Collections.max(res);
-        indiceMax=res.indexOf(max);
-        //System.out.println(max);
-        accu.put(possibilities.get(res.indexOf(max)), max);
-        res.remove(indiceMax);
-        possibilities.remove(indiceMax);
-        max=Collections.max(res);
-        //System.out.println(max);
-        accu.put(possibilities.get(res.indexOf(max)), max);
-        //System.out.println("dans bestPossibilities");
-        for (Entry<int[], Integer> entry : accu.entrySet()) {
-            //System.out.println(Arrays.toString(entry.getKey())+" : "+entry.getValue());
+        if(res.size()>=3) {
+            int max = Collections.max(res);
+            int indiceMax = res.indexOf(max);
+            //System.out.println(max);
+            accu.put(possibilities.get(res.indexOf(max)), max);
+            res.remove(indiceMax);
+            possibilities.remove(indiceMax);
+            if(res.size()>=2){
+                max = Collections.max(res);
+                indiceMax = res.indexOf(max);
+                //System.out.println(max);
+                accu.put(possibilities.get(res.indexOf(max)), max);
+                res.remove(indiceMax);
+                possibilities.remove(indiceMax);
+            if(res.size()>=1) {
+                max = Collections.max(res);
+                //System.out.println(max);
+                accu.put(possibilities.get(res.indexOf(max)), max);
+            }}
+            //System.out.println("dans bestPossibilities");
+            for (Entry<int[], Integer> entry : accu.entrySet()) {
+                //System.out.println(Arrays.toString(entry.getKey())+" : "+entry.getValue());
+            }
         }
         return accu;
     }
@@ -453,7 +458,7 @@ public class Puissances4 {
             somme+=totdir4;
             //System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
             if(result.containsValue(4)) {
-                return 15;
+                return 17;
             }else {
                 switch (somme) {
                     case 4:
@@ -555,7 +560,7 @@ public class Puissances4 {
             somme+=totdir4;
             //System.out.println("somme : "+somme+" coup  : "+Arrays.toString(coup));
             if(result.containsValue(4)) {
-                return -15;
+                return -17;
             }else {
                 switch (somme) {
                     case 4:
@@ -881,7 +886,7 @@ public class Puissances4 {
                 coupAJouer=entry.getKey();     // Print the key with max value
             }
         }
-        this.plateausortie[coupAJouer[0]][coupAJouer[1]]="X";
+        this.plateausortie[coupAJouer[0]][coupAJouer[1]]="O";
         String str="";
         for(int i=(this.plateausortie.length-1);i>=0;i--) {
             for(int j=0;j<this.plateausortie[i].length;j++) {
@@ -1024,6 +1029,10 @@ public class Puissances4 {
 
                 p.changementJeux(args[0]);
                 ArrayList<int[]> possibility=p.Possibilities(p.plateaux);
+                for(int[] t:possibility){
+                    System.out.println(Arrays.toString(t));
+                }
+//                System.out.println(Arrays.toString(possibility.toArray()));
                 boolean win=false;
                 boolean loose=false;
                 for(int i=0;i<p.plateaux.length;i++) {
